@@ -52,15 +52,17 @@ class ProductionConfig(BaseConfig):
     TESTING = False
     SECRET_KEY = os.getenv("SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
-    
-    if not SECRET_KEY:
-        raise RuntimeError(
-            "SECRET_KEY no está configurada. Por favor, establece la variable de entorno SECRET_KEY para producción."
-        )
-    if not SQLALCHEMY_DATABASE_URI:
-        raise RuntimeError(
-            "DATABASE_URL no está configurada. Por favor, establece la variable de entorno DATABASE_URL para producción."
-        )
+    @classmethod
+    def init_app(cls, app) -> None:
+        """Valida variables críticas solo al inicializar una app de producción."""
+        if not cls.SECRET_KEY:
+            raise RuntimeError(
+                "SECRET_KEY no está configurada. Define SECRET_KEY para producción."
+            )
+        if not cls.SQLALCHEMY_DATABASE_URI:
+            raise RuntimeError(
+                "DATABASE_URL no está configurada. Define DATABASE_URL para producción."
+            )
 
 # configuración factory para seleccionar la configuración según el entorno
 config_by_name = {
