@@ -23,13 +23,17 @@ def create_app(config_name: str | None = None) -> Flask:
     # 2. Inicializar extensiones desacopladas
     db.init_app(app)
     migrate.init_app(app, db)
+    
+    # 3 Importar modelos aquí para que SQLAlchemy / Flask-Migrate registren las tablas
+    from app import models # pylint: disable=import-outside-toplevel
 
-    # 3. Ruta base de verificación (healthcheck)
+    # 4. Ruta base de verificación (healthcheck)
     @app.get("/api/v1/health")
     def health_check():
         return jsonify({"status": "ok", "environment":env_name}), 200
 
-    # 4 Aquí registramos nuestros Blueprints modulares (ej. autch, users, projects...) e importaciones
+    # 5 Aquí registramos nuestros Blueprints modulares (ej. autch, users, projects...) 
+    # e importaciones
     # from app.api.v1 import api_v1_bp
     # app.register_blueprint(api_v1_bp)
 
