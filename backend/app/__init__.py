@@ -30,8 +30,12 @@ def create_app(config_name: str | None = None) -> Flask:
     def health_check():
         return jsonify({"status": "ok", "environment":env_name}), 200
     
-    # 4 Aquí registramos nuestros Blueprints modulares (ej. autch, users, projects...)
+    # 4 Aquí registramos nuestros Blueprints modulares (ej. autch, users, projects...) e importaciones
     # from app.api.v1 import api_v1_bp
     # app.register_blueprint(api_v1_bp)
+    
+    from app.api.v1.projects.routes import projects_bp
+    
+    app.register_blueprint(projects_bp)
     
     return app
