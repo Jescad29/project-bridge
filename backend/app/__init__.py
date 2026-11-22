@@ -1,7 +1,7 @@
 import os
 from flask import Flask, jsonify
 from app.config import config_by_name
-from app.extensions import db, migrate
+from app.extensions import db, migrate, cors
 
 def create_app(config_name: str | None = None) -> Flask:
     """_summary_
@@ -23,6 +23,16 @@ def create_app(config_name: str | None = None) -> Flask:
     # 2. Inicializar extensiones desacopladas
     db.init_app(app)
     migrate.init_app(app, db)
+    cors.init_app(
+        app,
+        resources={
+            r"/api/*": {
+                "origins": app.config["CORS_ORIGINS"],
+                "methods": ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+                "allow_headers": ["Content-Type", "Authorization"],
+            }
+        },
+    )
     
     # 3 Importar modelos aquí para que SQLAlchemy / Flask-Migrate registren las tablas
     from app import models # pylint: disable=import-outside-toplevel

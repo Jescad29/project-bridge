@@ -14,7 +14,13 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 1800}
-    
+    CORS_ORIGINS =[
+        origin.strip()
+        for origin in os.environ.get(
+            "CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173"
+        ).split(",")
+        if origin.strip()
+    ]
 
 
 class DevelopmentConfig(BaseConfig):
