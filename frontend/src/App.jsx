@@ -1,10 +1,10 @@
 import { Toaster } from "@/components/ui/sonner";
-import { ProjectsPage } from "./features/projects/pages/ProjectsPage";
+import { AppRouter } from "@/routes/AppRouter";
 
 export default function App() {
   return (
     <>
-      <ProjectsPage />
+      <AppRouter />
       <Toaster richColors position="bottom-right" />
     </>
   );
