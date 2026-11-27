@@ -12,6 +12,7 @@ function getErrorMessage(err, fallback) {
 
 export const useProjectsStore = create((set, get) => ({
   projects: [],
+  selectedProject: null,
   loading: false,
   submitting: false,
   error: null,
@@ -29,6 +30,22 @@ export const useProjectsStore = create((set, get) => ({
         error: getErrorMessage(err, "No se pudieron cargar los proyectos."),
         loading: false,
       });
+    }
+  },
+
+  fetchProjectById: async (projectId) => {
+    set({ loading: true, error: null, selectedProject: null });
+    try {
+      const response = await projectsApi.getById(projectId);
+      set({ selectedProject: response?.data || null, loading: false });
+      return { ok: true, data: response?.data };
+    } catch (err) {
+      const message = getErrorMessage(
+        err,
+        "No se pudo cargar el detalle del proyecto."
+      );
+      set({ error: message, loading: false });
+      return { ok: false, error: message };
     }
   },
 
@@ -51,6 +68,34 @@ export const useProjectsStore = create((set, get) => ({
       return { ok: true, data: created };
     } catch (err) {
       const message = getErrorMessage(err, "No se pudo crear el proyecto.");
+      set({ error: message, submitting: false });
+      return { ok: false, error: message };
+    }
+  },
+
+  updateProject: async (projectId, payload) => {
+    set({ submitting: true, error: null });
+    try {
+      const response = await projectsApi.update(projectId, payload);
+      const updated = response?.data;
+
+      set((state) => ({
+        projects: state.projects.map((item) =>
+          item.id === projectId ? updated : item
+        ),
+        selectedProject:
+          state.selectedProject?.id === projectId
+            ? updated
+            : state.selectedProject,
+        submitting: false,
+      }));
+
+      return { ok: true, data: updated };
+    } catch (err) {
+      const message = getErrorMessage(
+        err,
+        "No se pudo actualizar el proyecto."
+      );
       set({ error: message, submitting: false });
       return { ok: false, error: message };
     }

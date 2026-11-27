@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
+import { Link, useNavigate} from "react-router-dom";
 import {
   Activity,
   CheckCircle2,
   Clock,
   FileEdit,
   FolderKanban,
+  Pencil,
   RefreshCw,
   Search,
   Trash2,
@@ -75,6 +77,7 @@ export function ProjectList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [targetProject, setTargetProject] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const navigate = useNavigate();
 
   const projects = useProjectsStore((state) => state.projects);
   const loading = useProjectsStore((state) => state.loading);
@@ -221,9 +224,12 @@ export function ProjectList() {
                         <span className="font-mono text-xs text-zinc-400">
                           #{project.id}
                         </span>
-                        <h3 className="text-sm font-semibold text-zinc-900 truncate">
+                        <Link
+                          to={`/projects/${project.id}`}
+                          className="text-sm font-semibold text-zinc-900 hover:underline truncate"
+                        >
                           {project.name}
-                        </h3>
+                        </Link>
                         <Badge
                           variant="outline"
                           className={`gap-1 font-medium ${meta.className}`}
@@ -251,17 +257,30 @@ export function ProjectList() {
                       )}
                     </div>
 
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setTargetProject(project)}
-                      disabled={isDeleting}
-                      className="self-start shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="mr-1.5 h-3.5 w-3.5" />
-                      {isDeleting ? "Eliminando..." : "Eliminar"}
-                    </Button>
+                    <div className="flex items-center gap-1.5 self-start shrink-0">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/projects/${project.id}`)}
+                        className="text-zinc-600 hover:text-zinc-900"
+                      >
+                        <Pencil className="mr-1.5 h-3.5 w-3.5" />
+                        Editar
+                      </Button>
+
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setTargetProject(project)}
+                        disabled={isDeleting}
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                        {isDeleting ? "Eliminando..." : "Eliminar"}
+                      </Button>
+                    </div>
                   </article>
                 );
               })}
