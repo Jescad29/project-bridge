@@ -7,6 +7,13 @@ def get_projects() -> list[dict]:
     projects = repository.list_all_projects()
     return [schemas.serialize_project(project) for project in projects]
 
+def get_project(project_id: int):
+    """Obtiene y serializa un proyecto"""
+    project = repository.get_project_by_id(project_id)
+    if not project:
+        return None, f"No se encontró el proyecto con id {project_id}."
+    return schemas.serialize_project(project), None
+
 
 def register_project(payload: dict) -> tuple[dict | None, str | None]:
     """Valida entrada, aplica reglas y crea un nuevo proyecto."""
@@ -20,6 +27,19 @@ def register_project(payload: dict) -> tuple[dict | None, str | None]:
         status=clean_data["status"],
     )
     return schemas.serialize_project(project), None
+
+def edit_project(project_id: int, payload: dict):
+    """Actualiza un proyecto"""
+    project = repository.get_project_by_id(project_id)
+    if not project:
+        return None, f"No se encontró el proyecto con id {project_id}.", 404
+
+    updates, error = schemas.validate_update_project(payload)
+    if error:
+        return None, error, 400
+
+    updated = repository.update_project(project, updates)
+    return schemas.serialize_project(updated), None, 200
 
 
 def remove_project(project_id: int) -> tuple[bool, str | None]:

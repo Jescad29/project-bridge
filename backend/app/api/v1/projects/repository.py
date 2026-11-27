@@ -25,6 +25,12 @@ def create_project(name: str, description: str | None, status: str) -> Project:
     db.session.commit()
     return project
 
+def update_project(project: Project, updates: dict):
+    for field, value in updates.items():
+        setattr(project, field, value)
+    db.session.commit()
+    return project
+
 
 def delete_project(project: Project) -> None:
     """Elimina un proyecto existente de la base de datos."""
