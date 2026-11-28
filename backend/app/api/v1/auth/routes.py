@@ -36,3 +36,43 @@ def me():
     if error:
         return jsonify({"error": error}), status_code
     return jsonify({"user": user_data}), status_code
+
+
+@auth_bp.post("/send-verification")
+def send_verification():
+    """Envía o reenvía un enlace de verificación de correo electrónico."""
+    payload = request.get_json(silent=True)
+    data, error, status_code = service.request_email_verification(payload)
+    if error:
+        return jsonify({"error": error}), status_code
+    return jsonify(data), status_code
+
+
+@auth_bp.get("/verify-email")
+def verify_email():
+    """Valida el token de verificación y marca el correo como verificado."""
+    token = request.args.get("token", "")
+    data, error, status_code = service.verify_email_token(token)
+    if error:
+        return jsonify({"error": error}), status_code
+    return jsonify(data), status_code
+
+
+@auth_bp.post("/forgot-password")
+def forgot_password():
+    """Solicita restablecimiento de contraseña (solo si el correo está verificado)."""
+    payload = request.get_json(silent=True)
+    data, error, status_code = service.request_password_reset(payload)
+    if error:
+        return jsonify({"error": error}), status_code
+    return jsonify(data), status_code
+
+
+@auth_bp.post("/reset-password")
+def handle_reset_password():
+    """Restablece la contraseña usando un token válido de un solo uso."""
+    payload = request.get_json(silent=True)
+    data, error, status_code = service.reset_password(payload)
+    if error:
+        return jsonify({"error": error}), status_code
+    return jsonify(data), status_code

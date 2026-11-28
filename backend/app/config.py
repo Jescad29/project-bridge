@@ -26,6 +26,22 @@ class BaseConfig:
         ).split(",")
         if origin.strip()
     ]
+    # URL del frontend para enlaces de verificación de correo y restablecimiento
+    FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    EMAIL_VERIFICATION_EXPIRES_MINUTES = int(
+        os.getenv("EMAIL_VERIFICATION_EXPIRES_MINUTES", "1440")
+    )
+    PASSWORD_RESET_EXPIRES_MINUTES = int(
+        os.getenv("PASSWORD_RESET_EXPIRES_MINUTES", "30")
+    )
+
+    # Configuración de correo (si MAIL_SERVER queda vacío, email_service registra en log)
+    MAIL_SERVER = os.getenv("MAIL_SERVER", "")
+    MAIL_PORT = int(os.getenv("MAIL_PORT", "587"))
+    MAIL_USERNAME = os.getenv("MAIL_USERNAME", "")
+    MAIL_PASSWORD = os.getenv("MAIL_PASSWORD", "")
+    MAIL_USE_TLS = os.getenv("MAIL_USE_TLS", "true").lower() == "true"
+    MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "noreply@projectbridge.local")
 
 
 class DevelopmentConfig(BaseConfig):
@@ -51,6 +67,7 @@ class TestingConfig(BaseConfig):
         "TEST_DATABASE_URL",
         "sqlite:///:memory:",
     )
+    MAIL_SERVER = ""
 
     # Evitar configuraciones de pool especificas de PostgreSQL durante las pruebas con SQLite
     SQLALCHEMY_ENGINE_OPTIONS = {}
