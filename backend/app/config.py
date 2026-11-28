@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from datetime import timedelta
 
 # Carga backend/.env si existe (en Docker o producción, las variables del entorno ya tienen prioridad)
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -11,6 +12,10 @@ class BaseConfig:
     """Configuración base compartida por todos los entornos."""
 
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'dev-jwt-key-change-in-production')
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(
+        minutes=int(os.environ.get('JWT_ACCESS_TOKEN_MINUTES', 60))
+    )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     JSON_SORT_KEYS = False
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 1800}
@@ -28,7 +33,7 @@ class DevelopmentConfig(BaseConfig):
 
     DEBUG = True
     SECRET_KEY = os.getenv(
-        "SECRET_KEY", 
+        "SECRET_KEY",
         "dev-secret-key-change-in-production"
     )
     SQLALCHEMY_DATABASE_URI = os.getenv(
@@ -46,7 +51,7 @@ class TestingConfig(BaseConfig):
         "TEST_DATABASE_URL",
         "sqlite:///:memory:",
     )
-    
+
     # Evitar configuraciones de pool especificas de PostgreSQL durante las pruebas con SQLite
     SQLALCHEMY_ENGINE_OPTIONS = {}
 
@@ -57,7 +62,9 @@ class ProductionConfig(BaseConfig):
     DEBUG = False
     TESTING = False
     SECRET_KEY = os.getenv("SECRET_KEY")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+
     @classmethod
     def init_app(cls, app) -> None:
         """Valida variables críticas solo al inicializar una app de producción."""
@@ -65,11 +72,14 @@ class ProductionConfig(BaseConfig):
             raise RuntimeError(
                 "SECRET_KEY no está configurada. Define SECRET_KEY para producción."
             )
+        if not cls.JWT_SECRET_KEY:
+            raise RuntimeError(
+                "JWT_SECRET_KEY no está configurada. Define JWT_SECRET_KEY para producción."
+            )
         if not cls.SQLALCHEMY_DATABASE_URI:
             raise RuntimeError(
                 "DATABASE_URL no está configurada. Define DATABASE_URL para producción."
             )
-
 # configuración factory para seleccionar la configuración según el entorno
 config_by_name = {
     "development": DevelopmentConfig,
