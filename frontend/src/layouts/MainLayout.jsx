@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import {
   Layers,
   FolderKanban,
@@ -8,8 +8,10 @@ import {
   Users,
   Menu,
   X,
+  LogOut,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useAuthStore } from "@/features/auth/hooks/useAuthStore";
 
 const NAVIGATION_ITEMS = [
   {
@@ -37,6 +39,15 @@ const NAVIGATION_ITEMS = [
 
 export function MainLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const handleLogout = () => {
+    setMobileMenuOpen(false);
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   const renderNavLinks = (onNavigate) =>
     NAVIGATION_ITEMS.map((item) => {
@@ -70,6 +81,31 @@ export function MainLayout() {
       );
     });
 
+  const renderSessionFooter = () => (
+    <div className="space-y-2.5">
+      {user && (
+        <div className="px-2">
+          <p className="text-xs font-semibold text-zinc-900 truncate">{user.name}</p>
+          <p className="text-[11px] text-zinc-500 truncate">{user.email}</p>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/80 rounded-lg px-3 py-2">
+        <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="font-medium">API v1 • En línea</span>
+      </div>
+
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors cursor-pointer"
+      >
+        <LogOut className="h-4 w-4 shrink-0" />
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-zinc-50/70 text-zinc-900 flex">
       {/* Sidebar fijo en escritorio */}
@@ -93,12 +129,7 @@ export function MainLayout() {
           <nav className="space-y-1">{renderNavLinks()}</nav>
         </div>
 
-        <div className="p-4 border-t border-zinc-200/80">
-          <div className="flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200/80 rounded-lg px-3 py-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-medium">API v1 • En línea</span>
-          </div>
-        </div>
+        <div className="p-4 border-t border-zinc-200/80">{renderSessionFooter()}</div>
       </aside>
 
       {/* Contenedor principal */}
@@ -123,8 +154,9 @@ export function MainLayout() {
 
         {/* Menú desplegable móvil */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-b border-zinc-200 bg-white px-4 py-3 space-y-1">
-            {renderNavLinks(() => setMobileMenuOpen(false))}
+          <div className="md:hidden border-b border-zinc-200 bg-white px-4 py-3 space-y-3">
+            <nav className="space-y-1">{renderNavLinks(() => setMobileMenuOpen(false))}</nav>
+            <div className="pt-3 border-t border-zinc-200/80">{renderSessionFooter()}</div>
           </div>
         )}
 
